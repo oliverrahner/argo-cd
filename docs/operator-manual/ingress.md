@@ -74,7 +74,7 @@ The Contour ingress controller can terminate TLS ingress traffic at the edge.
 
 The Argo CD API server should be run with TLS disabled. Edit the `argocd-server` Deployment to add the `--insecure` flag to the argocd-server container command.
 
-It is also possible to provide an internal-only ingress path and an external-only ingress path by deploying two instances of Contour: one behind a private-subnet LoadBalancer service and one behind a public-subnet LoadBalancer service. The private Contour deployment will pick up Ingresses annotated with `kubernetes.io/ingress.class: contour-internal` and the public Contour deployment will pick up Ingresses annotated with `kubernetes.io/ingress.class: contour-external`.
+It is also possible to provide an internal-only ingress path and an external-only ingress path by deploying two instances of Contour: one behind a private-subnet LoadBalancer service and one behind a public-subnet LoadBalancer service. The private Contour deployment will pick up Ingresses configured with `ingressClassName: contour-internal` and the public Contour deployment will pick up Ingresses annotated with `ingressClassName: contour-external`.
 
 This provides the opportunity to deploy the Argo CD UI privately but still allow for SSO callbacks to succeed.
 
@@ -88,9 +88,9 @@ kind: Ingress
 metadata:
   name: argocd-server-http
   annotations:
-    kubernetes.io/ingress.class: contour-internal
     ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
+  ingressClassName: contour-internal
   rules:
   - host: internal.path.to.argocd.io
     http:
@@ -114,9 +114,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: argocd-server-grpc
-  annotations:
-    kubernetes.io/ingress.class: contour-internal
 spec:
+  ingressClassName: contour-internal
   rules:
   - host: grpc-internal.path.to.argocd.io
     http:
@@ -141,9 +140,9 @@ kind: Ingress
 metadata:
   name: argocd-server-external-callback-http
   annotations:
-    kubernetes.io/ingress.class: contour-external
     ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
+  ingressClassName: contour-external
   rules:
   - host: external.path.to.argocd.io
     http:
@@ -199,10 +198,10 @@ metadata:
   name: argocd-server-ingress
   namespace: argocd
   annotations:
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 spec:
+  ingressClassName: nginx
   rules:
   - host: argocd.example.com
     http:
@@ -231,7 +230,6 @@ metadata:
   namespace: argocd
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    kubernetes.io/ingress.class: nginx
     kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
     # If you encounter a redirect loop or are getting a 307 response code
@@ -239,6 +237,7 @@ metadata:
     #
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
+  ingressClassName: nginx
   rules:
   - host: argocd.example.com
     http:
@@ -269,10 +268,10 @@ metadata:
   name: argocd-server-http-ingress
   namespace: argocd
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
+  ingressClassName: nginx
   rules:
   - http:
       paths:
@@ -298,9 +297,9 @@ metadata:
   name: argocd-server-grpc-ingress
   namespace: argocd
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
 spec:
+  ingressClassName: nginx
   rules:
   - http:
       paths:
